@@ -1,0 +1,47 @@
+<section class="row" style="height: 100%">
+  <section class="column column-10">
+    <h2>Channels</h2>
+    <dl>
+      <%= for {chan, has_new_messages} <- @chans do %>
+        <dt>
+        <%= if has_new_messages do %>
+          <b><%= live_patch "# #{chan}", to: Routes.live_path(@socket,  HumioLoggingExampleWeb.PageLive, chan, user: @user.nick) %></b>
+        <% else %>
+          <%= live_patch "# #{chan}", to: Routes.live_path(@socket,  HumioLoggingExampleWeb.PageLive, chan, user: @user.nick) %>
+        <% end %>
+        </dt>
+      <% end %>
+    </dl>
+  </section>
+  <section class="column column-80" style="height: 100%">
+    <div class="row" style="height: 80%">
+      <div class="column" style="display: flex; flex-direction: column; overflow-y: auto; padding-left: 70px" phx-hook="ScrollToBottom">
+        <%=for {message, idx} <- chan_messages(@current_topic, @chan_states) do %>
+          <%= live_component @socket, Components.ChatMessage, id: message.id, idx: idx, message: message %>
+        <% end %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column" style="padding-left: 70px">
+        <form class="chat-input" phx-submit="submit-chat">
+          <input type="text" name="message" placeholder="Send message to #<%= @current_topic %>" autocomplete="off"/>
+          <button type="submit" phx-disable-with="Sending...">Send</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="column column-10">
+    <h2>Users</h2>
+    <dl>
+      <%= for user <- @current_users do %>
+        <dt id="<%= user.nick %>">
+          <%= if user.nick == @user.nick do %>
+            <span>*</span>
+          <% end %>
+          <span><%= user.display_name %></span>
+        </dt>
+      <% end %>
+    </dl>
+  </section>
+</section>
