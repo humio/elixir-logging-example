@@ -1,19 +1,37 @@
-# HumioLoggingExample
+# Humio Elixir Logging Example
 
-To start your Phoenix server:
+To start the demo:
 
-  * Install dependencies with `mix deps.get`
-  * Install Node.js dependencies with `npm install` inside the `assets` directory
+  * Run `mix setup`
   * Start Phoenix endpoint with `mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+To ship logs to humio cloud you can use [`vector`](https://vector.dev)
 
-## Learn more
+  * Setup a ingest token for your sandbox on [Humio Cloud](https://cloud.humio.com)
+	* Export your ingest token in your shell as `HUMIO_INGEST_TOKEN`
+  * Start Phoenix endpoint with `mix phx.server | vector`
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+Vector toml (`/etc/vector/vector.toml`)
+```
+data_dir = "/var/lib/vector"
+
+[sources.in]
+  type = "stdin"
+
+[sinks.humio]
+  type = "humio_logs"
+  inputs = ["in"]
+  healthcheck = true
+  host = "https://cloud.humio.com"
+  compression = "gzip"
+  token = "${HUMIO_INGEST_TOKEN}" # required
+
+  encoding.codec = "json"
+
+[sinks.out]
+  inputs   = ["in"]
+  type     = "console"
+  encoding = "text"
+```
